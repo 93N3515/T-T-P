@@ -62,7 +62,7 @@ def cookieParser(path,work):
                                                     tokens.append(line[6].strip() + "_-#-_" + myrar.filename + str(i.filename))
                             except:
                                 pass
-
+    print("Загрузка прошла успешно")
     tokens = list(set(tokens))
     print(len(tokens))
     result = open(f'{savefilename}\\result.txt', 'w+', encoding="UTF-8")
@@ -77,7 +77,7 @@ def cookieParser(path,work):
             pass
     result.close
     result_p.close()
-    print("Загрузка прошла успешно")
+    input()
 
 def menu():
     work = input("Режим работы: \n1. Из папки\n2. Из архив")
