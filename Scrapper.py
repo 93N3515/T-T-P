@@ -34,24 +34,25 @@ def cookieParser(path,work):
                 if zipfile.is_zipfile(path+"\\"+file):
                     with ZipFile(path+"\\"+file) as myzip:
                         for i in ZipFile.infolist(myzip):
-                            try:
                                 if i.filename.find(".txt") >= 1:
-                                    for line in myzip.open(i).readlines():
-                                        line = line.decode()
-                                        if line.find("	/	") >= 1:
-                                            line = line.split("	")
-                                            if line[0] == ("tiktok.com") or line[0] == (".tiktok.com") or line[0] == (
-                                                    ".www.tiktok.com") or line[0] == ("www.tiktok.com"):
-                                                if str(line[5]) == ('sessionid_ss') or str(line[5]) == ('sessionid'):
-                                                    tokens.append(
-                                                        line[6].strip() + "_-#-_" + myzip.filename + str(i.filename))
-                            except:
-                                pass
+                                    try:
+                                        for line in myzip.open(i).readlines():
+                                            line = line.decode()
+                                            if line.find("	/	") >= 1:
+                                                line = line.split("	")
+                                                if line[0] == ("tiktok.com") or line[0] == (".tiktok.com") or line[0] == (
+                                                        ".www.tiktok.com") or line[0] == ("www.tiktok.com"):
+                                                    if str(line[5]) == ('sessionid_ss') or str(line[5]) == ('sessionid'):
+                                                        tokens.append(
+                                                            line[6].strip() + "_-#-_" + myzip.filename + str(i.filename))
+                                    except UnicodeDecodeError:
+                                        print("unicode error")
+
                 elif rarfile.is_rarfile(path+"\\"+file):
                     with rarfile.RarFile(path + "\\" + file) as myrar:
                         for i in rarfile.RarFile.infolist(myrar):
-                            try:
-                                if i.filename.find(".txt") >= 1:
+                            if i.filename.find(".txt") >= 1:
+                                try:
                                     for line in myrar.open(i).readlines():
                                         line = line.decode()
                                         if line.find("	/	") >= 1:
@@ -60,9 +61,10 @@ def cookieParser(path,work):
                                             ".www.tiktok.com") or line[0] == ("www.tiktok.com"):
                                                 if str(line[5]) == ('sessionid_ss') or str(line[5]) == ('sessionid'):
                                                     tokens.append(line[6].strip() + "_-#-_" + myrar.filename + str(i.filename))
-                            except:
-                                pass
-    print("Загрузка прошла успешно")
+                                except UnicodeDecodeError:
+                                    print("unicode error")
+
+
     tokens = list(set(tokens))
     print(len(tokens))
     result = open(f'{savefilename}\\result.txt', 'w+', encoding="UTF-8")
@@ -77,7 +79,7 @@ def cookieParser(path,work):
             pass
     result.close
     result_p.close()
-    input()
+    print("Загрузка прошла успешно")
 
 def menu():
     work = input("Режим работы: \n1. Из папки\n2. Из архив")
