@@ -8,9 +8,11 @@ import rarfile
 def cookieParser(path,work):
     savefilename = f"tokens {str(datetime.date.today()) + ' ' + str(datetime.datetime.now().hour) + '.' + str(datetime.datetime.now().minute) + '.' + str(datetime.datetime.now().second)}"
     os.mkdir(savefilename)
+    result = open(f'{savefilename}\\result.txt', 'w+', encoding="UTF-8")
+    result_p = open(f'{savefilename}\\result_path.txt', 'w+', encoding="UTF-8")
     print("Загрузка логов")
-    tokens = []
-
+    tokens = 0
+    token_list = []
     if work == "1":
         for root, dirs, filename in os.walk(path):
             for file in filename:
@@ -25,8 +27,15 @@ def cookieParser(path,work):
                         cc_split = line.split("	")
                         if cc_split[0] == ("tiktok.com") or cc_split[0] == (".tiktok.com") or cc_split[0] == (
                         ".www.tiktok.com") or cc_split[0] == ("www.tiktok.com"):
+                            print(line)
                             if str(cc_split[5]) == ('sessionid_ss') or str(cc_split[5]) == ('sessionid'):
-                                tokens.append(line.split("	")[6].strip() + "_-#-_" + filep)
+                                tt_c = line.split("	")[6]
+                                token = tt_c + "_-#-_" + filep
+                                if tt_c not in token_list:
+                                    token_list.append(tt_c)
+                                    result.write(token.split("_-#-_")[0])
+                                    result_p.write(token.split("_-#-_")[1])
+                                    tokens += 1
 
     else:
             for file in os.listdir(path):
@@ -36,53 +45,44 @@ def cookieParser(path,work):
                             with ZipFile(path+"\\"+file) as myzip:
                                 for i in ZipFile.infolist(myzip):
                                         if i.filename.find(".txt") >= 1:
-                                            try:
                                                 for line in myzip.open(i).readlines():
-                                                    line = line.decode()
+                                                    line = line.decode(errors="replace")
                                                     if line.find("	/	") >= 1:
                                                         line = line.split("	")
                                                         if line[0] == ("tiktok.com") or line[0] == (".tiktok.com") or line[0] == (
                                                                 ".www.tiktok.com") or line[0] == ("www.tiktok.com"):
                                                             if str(line[5]) == ('sessionid_ss') or str(line[5]) == ('sessionid'):
-                                                                tokens.append(
-                                                                    line[6].strip() + "_-#-_" + myzip.filename + str(i.filename))
-                                            except UnicodeDecodeError:
-                                                print("unicode error")
+                                                                if line[6] not in token_list:
+                                                                    token_list.append(line[6])
+                                                                    result.write(token.split("_-#-_")[0])
+                                                                    result_p.write(token.split("_-#-_")[1])
+                                                                    tokens += 1
                         except RuntimeError:
                             print(f"\t{file}\t Имеется пароль")
 
                     elif rarfile.is_rarfile(path+"\\"+file):
-                        try:
                             with rarfile.RarFile(path + "\\" + file) as myrar:
-                                for i in rarfile.RarFile.infolist(myrar):
-                                    if i.filename.find(".txt") >= 1:
-                                        try:
-                                            for line in myrar.open(i).readlines():
-                                                line = line.decode()
-                                                if line.find("	/	") >= 1:
-                                                    line = line.split("	")
-                                                    if line[0] == ("tiktok.com") or line[0] == (".tiktok.com") or line[0] == (
-                                                    ".www.tiktok.com") or line[0] == ("www.tiktok.com"):
-                                                        if str(line[5]) == ('sessionid_ss') or str(line[5]) == ('sessionid'):
-                                                            tokens.append(line[6].strip() + "_-#-_" + myrar.filename + str(i.filename))
-                                        except UnicodeDecodeError:
-                                            print("unicode error")
-                        except rarfile.PasswordRequired:
-                            print(f"\t{file}\t Имеется пароль")
-    tokens = list(set(tokens))
-    print(len(tokens))
-    result = open(f'{savefilename}\\result.txt', 'w+', encoding="UTF-8")
-    result_p = open(f'{savefilename}\\result_path.txt', 'w+', encoding="UTF-8")
-    for token_i in tokens:
-        try:
-            token = token_i.split("_-#-_")[0]
-            filep = token_i.split("_-#-_")[1]
-            result.write(f"{token}\n")
-            result_p.write(f"{token}\n{filep}\n\n")
-        except:
-            pass
-    result.close
+                                if rarfile.PasswordRequired(myrar) != True:
+                                    for i in rarfile.RarFile.infolist(myrar):
+                                        if i.filename.find(".txt") >= 1:
+                                                for line in myrar.open(i).readlines():
+                                                    line = line.decode(errors="replace")
+                                                    if line.find("	/	") >= 1:
+                                                        line = line.split("	")
+                                                        if line[0] == ("tiktok.com") or line[0] == (".tiktok.com") or line[0] == (
+                                                        ".www.tiktok.com") or line[0] == ("www.tiktok.com"):
+                                                            if str(line[5]) == ('sessionid_ss') or str(line[5]) == ('sessionid'):
+                                                                token = line[6] + "_-#-_" + i.filename
+                                                                if line[6] not in token_list:
+                                                                    token_list.append(line[6])
+                                                                    result.write(token.split("_-#-_")[0])
+                                                                    result_p.write(token.split("_-#-_")[1])
+                                                                    tokens += 1
+                                else:
+                                    print(f"\t{file}\t Имеется пароль")
+    result.close()
     result_p.close()
+    print("Токенов нашло: "+tokens)
     print("Загрузка прошла успешно")
 
 def menu():
